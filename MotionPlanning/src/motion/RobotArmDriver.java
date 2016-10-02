@@ -3,6 +3,7 @@ package motion;
 import javax.swing.*;
 
 import motion.Point;
+import motion.RobotArmNode;
 
 public class RobotArmDriver {
 
@@ -19,19 +20,21 @@ public class RobotArmDriver {
 		//double[] theta = {Math.PI*6/4, 0, Math.PI*4, 0};
 		k = 2;
 		double[] theta = {Math.PI*3/8, Math.PI*1/4};
+		double[] goal = {Math.PI*3/2, Math.PI/2};
 		
 		int[] ln = new int[k];
 		for (int i = 0; i < k; i++)
 			ln[i] = 100;
 		
-		RobotArm arm = new RobotArm(theta, ln, k, obstacles);
+		RobotArmProblem arm = new RobotArmProblem(theta, goal, ln, k, obstacles);
+		//RobotArmNode start = arm.startNode;
 		
-		Point[] points = arm.getPoints();
-		
-		for (int i = 0; i < k; i++) {
-			
-			System.out.println("("+points[i].x+", "+points[i].y+")");
+		try {
+			Thread.sleep(2000);
+		} catch (InterruptedException e) {
+			e.printStackTrace();
 		}
+
 		
         javax.swing.SwingUtilities.invokeLater(new Runnable() {
             public void run() {
@@ -39,6 +42,10 @@ public class RobotArmDriver {
             }
         });
 		
+
+		
+		double[] theta2 = {Math.PI, Math.PI*3/2};
+		//arm.updateNode(theta2);
 		
 	}
 	

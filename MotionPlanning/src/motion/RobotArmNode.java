@@ -12,7 +12,7 @@ import java.awt.geom.Line2D.Double;
 
 import javax.swing.*;
 
-public class RobotArm {
+public class RobotArmNode {
 	
 	private final int RECT_DIM = 30;
 
@@ -21,7 +21,9 @@ public class RobotArm {
 	private int numSegments;
 	private Point[] obstacles;
 	
-	public RobotArm(double[] angles, int[] ln, int k, Point[] obs){
+	JPanel jp;
+	
+	public RobotArmNode(double[] angles, int[] ln, int k, Point[] obs){
 		theta = angles;
 		length = ln;
 		numSegments = k;
@@ -102,7 +104,7 @@ public class RobotArm {
         
         jf.getContentPane().setLayout(new BorderLayout());
         
-        JPanel jp = new RobotArmPanel();
+        jp = new RobotArmPanel();
         jp.setPreferredSize(new Dimension(dim, dim));
         jp.setMinimumSize(new Dimension(dim, dim));
         jp.setBackground(Color.white);
@@ -113,12 +115,22 @@ public class RobotArm {
         jf.pack();
         jf.setVisible(true);
     }
+    
+    
+    
+    public void updateNode(double[] t) {
+    	theta = t;
+    	
+    	jp.repaint();
+    }
+    
 	
+    
     //Used to display the current configuration of the RobotArm
-    public class RobotArmPanel extends JPanel {
-    	
-    	
-    	//Does the actual drawing for the class
+    private class RobotArmPanel extends JPanel {
+		private static final long serialVersionUID = 1L; //Default
+
+		//Does the actual drawing for the class
         private void doDrawing(Graphics g) {
 
             Graphics2D g2d = (Graphics2D) g;
@@ -153,9 +165,7 @@ public class RobotArm {
             super.paintComponent(g);
             doDrawing(g);          
         }
-    	
-    	
-    	
+	
     }
 	
 	
