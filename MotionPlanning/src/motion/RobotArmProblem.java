@@ -143,7 +143,7 @@ public class RobotArmProblem {//extends RobotSearch {
 
     	for (RobotArmNode node : graph.getKeySet()) {
     		getNeighbors(node, graph, k);
-    		//updatePrintNode(node.theta); //----------------------------------------------------------
+    		updatePrintNode(node.theta); //----------------------------------------------------------
     		//for (int i = 0; i < node.theta.length; i++)
     		//	System.out.print(node.theta[i]+"  ");
     		//break;
@@ -230,7 +230,7 @@ public class RobotArmProblem {//extends RobotSearch {
     			continue;
     		
     		//double dist = node.getDist(nd);
-    		if (node.connectNode(key))
+    		//if (node.connectNode(key))
     			successors.add(key);
     		//Attempt to connect
     	}	
@@ -244,13 +244,16 @@ public class RobotArmProblem {//extends RobotSearch {
     	        }
     	    });
 		
-    	
-		for (int i = 0; i < k; i++) {
+    	int i = 0;
+		while (i < k) {
 			//Add edge
 			RobotArmNode adjNode = successors.get(i);
-			if(!graph.containsNode(adjNode))
-				graph.addNode(adjNode);
-			graph.addEdge(node, adjNode);
+			if (node.connectNode(adjNode)) {
+				if(!graph.containsNode(adjNode))
+					graph.addNode(adjNode);
+				graph.addEdge(node, adjNode);
+				i++;
+			}
 			
 			//for (int j = 0; j < successors.get(i).theta.length; j++)
 			//	System.out.print(successors.get(i).theta[j]+" ");
@@ -399,7 +402,7 @@ public class RobotArmProblem {//extends RobotSearch {
 		
 		
 		//Local planner
-	    //Returns true if the two nodes can be connected
+	    //Returns true if one can get to other from this node
 	    public boolean connectNode(RobotArmNode other) {
 	    	double[] currTheta = Arrays.copyOf(theta, theta.length);
 	    	RobotArmNode currNode;
@@ -409,26 +412,57 @@ public class RobotArmProblem {//extends RobotSearch {
 	    	//	System.out.println(currTheta[i]+"   "+other.theta[i]);
 	    	//}
 	    	
-			//updatePrintNode(currTheta);
+			updatePrintNode(currTheta);
 	    	
-	    	//Rotate counterclockwise
+	    	//Rotate in closest direction
 	    	for (int i = 0; i < theta.length; i++) {
+	    		int rotateDir;
+	    		double diff = Math.abs(other.theta[i] - theta[i]); //other.theta[i] is goal, theta[i] is start
+	    		//double opp = (other.theta[i] + Math.PI) % (2*Math.PI); //Gets angle opposite on circle
+	    		
+	    		/*if (theta[i] > other.theta[i] || theta[i] < opp)
+	    			rotateDir = -1;
+	    		else
+	    			rotateDir = 1; */
+	    		
+	    		if (diff > Math.PI) //If over halfway around circle
+	    			rotateDir = 1; //Rotate counterclockwise
+	    		else 
+	    			rotateDir = -1; //Rotate clockwise
+	    		
+	    		//System.out.println("\n"+theta[i]+ "  " + other.theta[i] + "  " + opp);
+	    		//if (currTheta[i] > other.theta[i])
+	    		
+	    			
 	    		while (currTheta[i] != other.theta[i]) {
 		    		//System.out.println("here2");
-	    			currNode = new RobotArmNode(currTheta);
-	    			double temp = (Math.abs(currTheta[i] - other.theta[i]) % (2*Math.PI));
+	    			
+	    			//double temp;
+	    			//if (false && currTheta[i] > Math.PI && other.theta[i] < Math.PI && rotateDir == 1)
+	    			//	temp = (((2*Math.PI) - currTheta[i]) + other.theta[i]) % (2*Math.PI);
+	    			//else
+	    			double temp = (Math.abs(other.theta[i] - currTheta[i]) % (2*Math.PI));
+	    			
 	    			if (temp > RESOLUTION ) {
-			    		//System.out.println("here3");
-	    				currTheta[i] += RESOLUTION;
+			    		System.out.print("here3  ");
+	    				currTheta[i] += rotateDir*RESOLUTION;
 	    			} else {
-			    		//System.out.println("here4");
+			    		System.out.println("here4");
 	    				currTheta[i] = other.theta[i];
 	    			}
+	    			System.out.println(" - " +currTheta[i] + "  " + other.theta[i] + "  t:"+temp+ " -- " +RESOLUTION);
 	    			
 	    			currTheta[i] = currTheta[i] % (2*Math.PI);
-	    			
+	    			currNode = new RobotArmNode(currTheta);
 	    			if (currNode.isIntersect())
-	    				connect = false;
+	    				return false;
+	    				//connect = false;
+	    			
+	    			try {
+	    				Thread.sleep(1000);
+	    			} catch (InterruptedException e) {
+	    				e.printStackTrace();
+	    			}
 	    			
 	    			/*try {
 	    				Thread.sleep(100);
@@ -436,7 +470,7 @@ public class RobotArmProblem {//extends RobotSearch {
 	    				e.printStackTrace();
 	    			} 
 	    			updatePrintNode(currTheta); */
-	    		}
+	    		}  /*
 	    		if (connect == false)
 	    			currTheta[i] = theta[i];
 	    		while (currTheta[i] != other.theta[i] && connect == false) {
@@ -461,9 +495,9 @@ public class RobotArmProblem {//extends RobotSearch {
 	    			} catch (InterruptedException e) {
 	    				e.printStackTrace();
 	    			}
-	    			updatePrintNode(currTheta); */
-	    		}
-	    		connect = true;
+	    			updatePrintNode(currTheta); 
+	    		} 
+	    		connect = true; */
 	    	}
 	    	/*
 	    	currTheta = Arrays.copyOf(theta, theta.length);
