@@ -81,7 +81,7 @@ public class RobotArmDriver {
 			e.printStackTrace();
 		}
 		
-		System.out.println("here");
+		System.out.println("\nDone!");
 		
 		/*
 		sol = arm.PRM(k, theta2, goal2);

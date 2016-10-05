@@ -152,54 +152,7 @@ public class RobotArmProblem {//extends RobotSearch {
     	getNeighbors(startNode, graph, k);
     	getNeighbors(goalNode, graph, k);
     	
-    	/*
-    	System.out.println("\n\n Exit \n\n");
-    	List<RobotArmNode> l = graph.getAdj(startNode);
-    	for (int i = 0; i < l.size(); i++)
-    		System.out.print(l.get(i)+" ");
-    	System.out.println();
-    	
-		try {
-			Thread.sleep(2000);
-		} catch (InterruptedException e) {
-			e.printStackTrace();
-		} 
-    	
-    	for (RobotArmNode node : graph.getKeySet()) {
-    		System.out.println(node);
-    		for (RobotArmNode adj : graph.getAdj(node))
-    			System.out.println("   "+adj);
-    	} */
-    	
-		//if (true)
-		//	return null;
-    	
-    	/*
-		List<RobotArmNode> successors = graph.getAdj(startNode);
-		for (int i = 0; i < successors.size(); i++) {
-			RobotArmNode n = successors.get(i);
-			System.out.println("# "+n);
-			double[] x = ((successors.get(i)).theta);
-			System.out.println("--"+x.toString());
-			for (int j = 0; j < numSegments; j++)
-				System.out.print(successors.get(i).theta[j]+" ");
-			System.out.println(successors.get(i).getPoints()[numSegments-1]);
-		
-		} */
-    	
-    	/*
-    	//Test print
-    	for (RobotArmNode node : graph.getKeySet()) {
-    		List<RobotArmNode> successors = graph.getAdj(node);
-    		for (int i = 0; i < k; i++) {
-		
-    			for (int j = 0; j < successors.get(i).theta.length; j++)
-    				System.out.print(successors.get(i).theta[j]+" ");
-    			System.out.println(successors.get(i).getPoints()[numSegments-1]);
-			
-    		}
-    		System.out.println(); 
-    	} */
+
     	
     	System.out.println("Running BFS");
     	sol = robotBFS(graph, startNode, goalNode);
@@ -224,7 +177,8 @@ public class RobotArmProblem {//extends RobotSearch {
     	//Randomly generate TOTAL_SAMPLES points in configuration space
     	int samp = 0; 
     	
-    	System.out.println(totalSamples);
+    	//System.out.println(totalSamples);
+    	
     	while (samp < TOTAL_SAMPLES) {
     	//while (samp < totalSamples) {
     		double[] randTheta = new double[numSegments];
@@ -288,6 +242,8 @@ public class RobotArmProblem {//extends RobotSearch {
 	}
     
     
+	
+	//Modified from Hwk1
 	private List<RobotArmNode> robotBFS(RobotArmGraph g, RobotArmNode startNode, RobotArmNode goalNode) {
 		//List<RobotArmNode> sol = new ArrayList<RobotArmNode>();
 		
