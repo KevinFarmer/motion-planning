@@ -30,6 +30,7 @@ public class RobotArmProblem {//extends RobotSearch {
 	private final int CIRC_DIM = 30;
 	private final double RESOLUTION = Math.PI/90; //1 degree increments
 	private final int TOTAL_SAMPLES = 10000;
+	private int totalSamples = 10;
 
 	private int[] length;
 	private int numSegments;
@@ -52,6 +53,9 @@ public class RobotArmProblem {//extends RobotSearch {
 		obstacles = obs;
 		printNode = new RobotArmNode(strAngles);
 		graph = null;
+		
+		for (int i = 0; i < k; i++)
+			totalSamples = 10*totalSamples;
 	}
 	
 	
@@ -128,8 +132,9 @@ public class RobotArmProblem {//extends RobotSearch {
     	}
     	
     	if (graph == null) {
+    		System.out.println("Generating nodes...");
     		graph = genRobotGraph();
-    	
+    		System.out.println("Nodes generated.\nCreating edges...");
     	
     		//System.out.println(graph.getKeySet().size());
     		for (RobotArmNode node : graph.getKeySet()) {
@@ -140,6 +145,7 @@ public class RobotArmProblem {//extends RobotSearch {
     		//System.out.println();
     		}
     	}
+    	System.out.println("Edges created.");
     	
     	graph.addNode(startNode);
     	graph.addNode(goalNode);
@@ -195,7 +201,9 @@ public class RobotArmProblem {//extends RobotSearch {
     		System.out.println(); 
     	} */
     	
+    	System.out.println("Running BFS");
     	sol = robotBFS(graph, startNode, goalNode);
+    	System.out.println("BFS done");
     	
     	//System.out.println("\n"+graph.getKeySet().size());
     	
@@ -215,7 +223,10 @@ public class RobotArmProblem {//extends RobotSearch {
     	
     	//Randomly generate TOTAL_SAMPLES points in configuration space
     	int samp = 0; 
+    	
+    	System.out.println(totalSamples);
     	while (samp < TOTAL_SAMPLES) {
+    	//while (samp < totalSamples) {
     		double[] randTheta = new double[numSegments];
     		double x;
     		Random r = new Random();

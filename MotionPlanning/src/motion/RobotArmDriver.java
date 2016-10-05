@@ -22,22 +22,28 @@ public class RobotArmDriver {
 		obstacles[3] = new Point(2, 100);
 		obstacles[4] = new Point(2, -90);
 		
-		//numSegments = 4;
-		//double[] theta = {Math.PI*6/4, 0, Math.PI/4, 0};
-		//double[] goal = {0, Math.PI*3/2, Math.PI/2, 0};
-		numSegments = 3;
-		double[] theta = {0, Math.PI*3/2, Math.PI*3/2};
-		double[] goal = {Math.PI*3/2, 0, Math.PI/2};
+		
+		
 		//numSegments = 2;
 		//double[] theta = {Math.PI*3/2, Math.PI*3/2};
 		//double[] goal = {0, Math.PI/2};
+		
+		numSegments = 4;
+		double[] theta = {Math.PI*6/4, 0, Math.PI/4, 0};
+		double[] goal = {0, Math.PI*3/2, Math.PI/2, Math.PI*3/2};
+		
+		/*numSegments = 3;
+		double[] theta = {0, Math.PI*3/2, Math.PI*3/2};
+		double[] goal = {Math.PI*3/2, 0, Math.PI/2};
+		double[] theta2 = {Math.PI*3/2, Math.PI*5/4 , Math.PI*3/2};
+		double[] goal2 = {Math.PI/2, 0, Math.PI*3/2}; */
+
 		
 		int[] ln = new int[numSegments];
 		for (int i = 0; i < numSegments; i++)
 			ln[i] = 100;
 		
-		double[] theta2 = {Math.PI*3/2, Math.PI*5/4 , Math.PI*3/2};
-		double[] goal2 = {Math.PI/2, 0, Math.PI*3/2};
+
 		
 		RobotArmProblem arm = new RobotArmProblem(theta, goal, ln, numSegments, obstacles);
 		//RobotArmNode start = arm.startNode;
@@ -70,13 +76,14 @@ public class RobotArmDriver {
 		}
 		
 		try {
-			Thread.sleep(2000);
+			Thread.sleep(1000);
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 		}
 		
 		System.out.println("here");
 		
+		/*
 		sol = arm.PRM(k, theta2, goal2);
 		if (sol != null){
 			for (RobotArmNode n : sol) {
@@ -87,7 +94,7 @@ public class RobotArmDriver {
 					e.printStackTrace();
 				}
 			}
-		}
+		} */
 		
 		
 		
