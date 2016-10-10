@@ -28,13 +28,13 @@ public class RobotArmDriver {
 		//double[] theta = {Math.PI*3/2, Math.PI*3/2};
 		//double[] goal = {0, Math.PI/2};
 		
-		numSegments = 4;
-		double[] theta = {Math.PI*6/4, 0, Math.PI/4, 0};
-		double[] goal = {0, Math.PI*3/2, Math.PI/2, Math.PI*3/2};
+		//numSegments = 4;
+		//double[] theta = {Math.PI*6/4, 0, Math.PI/4, 0};
+		//double[] goal = {0, Math.PI*3/2, Math.PI/2, Math.PI*3/2};
 		
-		/*numSegments = 3;
+		numSegments = 3;
 		double[] theta = {0, Math.PI*3/2, Math.PI*3/2};
-		double[] goal = {Math.PI*3/2, 0, Math.PI/2};
+		double[] goal = {Math.PI*3/2, 0, Math.PI/2}; /*
 		double[] theta2 = {Math.PI*3/2, Math.PI*5/4 , Math.PI*3/2};
 		double[] goal2 = {Math.PI/2, 0, Math.PI*3/2}; */
 

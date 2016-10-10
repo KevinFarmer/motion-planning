@@ -29,7 +29,7 @@ public class RobotArmProblem {//extends RobotSearch {
 	
 	private final int CIRC_DIM = 30;
 	private final double RESOLUTION = Math.PI/90; //1 degree increments
-	private final int TOTAL_SAMPLES = 10000;
+	private final int TOTAL_SAMPLES = 5000;
 	private int totalSamples = 10;
 
 	private int[] length;
