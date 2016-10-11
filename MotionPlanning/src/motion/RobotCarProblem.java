@@ -8,8 +8,10 @@ import java.awt.Graphics2D;
 import java.awt.Rectangle;
 import java.awt.RenderingHints;
 import java.awt.geom.AffineTransform;
+import java.awt.geom.Arc2D;
 import java.awt.geom.Ellipse2D;
 import java.awt.geom.Line2D;
+import java.awt.geom.Path2D;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
@@ -22,8 +24,9 @@ import motion.RRTProblem.RRTNode;
 
 public class RobotCarProblem extends RRTProblem {
 	
-	private final int VELOCITY = 16;
+	//private final int VELOCITY = 16;
 	private final int CIRC_DIM = 30;
+	private final int ACCUR = 4;
 	
 	private List<Line2D.Double> obstacles;
 	private int panelDim;
@@ -33,11 +36,14 @@ public class RobotCarProblem extends RRTProblem {
 	
 	RobotCarPanel jp;
 	private RRTNode printNode;
+	private List<Path2D.Double> paths;
+	private List<Arc2D.Double> arcs; 
 
 	public RobotCarProblem (int strX, int strY, double startTheta, int glX, int glY, 
 			List<Line2D.Double> obs, int dim) {
 		
 		startNode = new RobotCarNode(strX, strY, startTheta);
+		goalNode = new RobotCarNode(glX, glY, startTheta);
 		goalX = glX;
 		goalY = glY;
 		
@@ -49,6 +55,8 @@ public class RobotCarProblem extends RRTProblem {
 		
 		panelDim = dim;
 		printNode = startNode;
+		paths = new ArrayList<Path2D.Double>();
+		arcs = new ArrayList<Arc2D.Double>();
 		
 	}
 	
@@ -70,14 +78,15 @@ public class RobotCarProblem extends RRTProblem {
 		public int getY() { return y; }
 		
 		public boolean goalTest() { 
-			return (x == goalX) && (y == goalY); 
-			}
+			//return (x == goalX) && (y == goalY); 
+			return Math.abs(x - goalX) < ACCUR && Math.abs(y - goalY) < ACCUR;
+		}
 		
 		
 		//Checks collision between the car and the walls
 		public boolean isIntersect() {
 			if (y == 40) {
-				System.out.println("here");
+				//System.out.println("here");
 			}
 			Ellipse2D pos = new Ellipse2D.Double(x-CIRC_DIM/2, y-CIRC_DIM/2, 
 												CIRC_DIM, CIRC_DIM);
@@ -93,29 +102,35 @@ public class RobotCarProblem extends RRTProblem {
 		public List<RRTNode> getSuccessors() {
 			List<RRTNode> successors = new ArrayList<RRTNode>();
 			
-			RRTNode newNode = rotatePos(20, 1);
-			if (!newNode.isIntersect())
+			RRTNode newNode;
+			
+			newNode = rotatePos(20, 1);
+			if (newNode != null) {
 				successors.add(newNode);
+				//return successors;
+			} 
+
 			
 			newNode = rotatePos(20, -1);
-			if (!newNode.isIntersect())
+			if (newNode != null) {
 				successors.add(newNode);
+				//return successors;
+			} 
 			
 			newNode = rotatePos(-20, 1);
-			if (!newNode.isIntersect())
+			if (newNode != null)
 				successors.add(newNode);
 			
 			newNode = rotatePos(-20, -1);
-			if (!newNode.isIntersect())
+			if (newNode != null)
 				successors.add(newNode);
 			
 			newNode = rotatePos(20, 0);
-			if (!newNode.isIntersect()) {
+			if (newNode != null)
 				successors.add(newNode);
-			}
 			
 			newNode = rotatePos(-20, 0);
-			if (!newNode.isIntersect())
+			if (newNode != null)
 				successors.add(newNode);
 			
 			
@@ -143,12 +158,21 @@ public class RobotCarProblem extends RRTProblem {
 				int newX = (int) (x+(v* Math.cos(theta)));
 				int newY = (int) (y+(v* Math.sin(theta)));
 				
-				//System.out.println(newX+","+newY);
-				return new RobotCarNode(newX, newY, theta);
 				
+				RobotCarNode newNode = new RobotCarNode(newX, newY, theta);
+				if (!newNode.isIntersect()) {
+					Path2D.Double path = new Path2D.Double();
+					path.moveTo(x, y);
+					path.lineTo(newX, newY);
+					paths.add(path);
+					
+					return newNode;
+				} else {
+					return null;
+				}			
 			}
 			
-			double rotateAngle = Math.PI/3; //temp  -----------------------
+			double rotateAngle = Math.PI/4; //temp  -----------------------
 			double rotateDir;   //The direction that the point of rotation is in
 			double rotateTheta; //The angle to rotate around the point by
 			
@@ -196,9 +220,34 @@ public class RobotCarProblem extends RRTProblem {
 			int newY = rotateY + newRelY;
 			
 			//System.out.println(newX+" "+newY+" : "+newTheta+"\n");
-			
-			
-			return new RobotCarNode(newX, newY, newTheta);
+			RobotCarNode newNode = new RobotCarNode(newX, newY, newTheta);
+			if (!newNode.isIntersect()) {
+
+				Path2D.Double path = new Path2D.Double();
+				path.moveTo(x, y);
+				path.lineTo(newX, newY);
+				paths.add(path);
+				/*
+				int wid = Math.abs(rotateX - x);
+				double start, rot;
+				double curveTheta = Math.signum(w)*rotateAngle;
+				//start = Math.toDegrees((2*Math.PI - theta)% (2*Math.PI));
+				start = 360 - (180+Math.toDegrees(rotateDir))%180;
+				//start = Math.toDegrees(rotateDir);
+				rot = Math.toDegrees(curveTheta);
+
+				System.out.println(Math.toDegrees(rotateDir));
+				System.out.println("s:"+start+" e:"+rot);
+				System.out.println("rot: "+rotateX+","+rotateY);
+				Arc2D.Double arc = new Arc2D.Double(rotateX-wid, rotateY-wid, 2*wid, 2*wid, 
+						start, -1*Math.signum(w)*Math.signum(l)*rot, Arc2D.OPEN);
+				arcs.add(arc); */
+				
+				return newNode;
+			} else {
+				return null;
+			}
+
 		}
 		
 		
@@ -231,7 +280,19 @@ public class RobotCarProblem extends RRTProblem {
 		}
 		
 		public String toString() {
-			return "("+x+","+y+")";
+			return "("+x+","+y+") "+theta;
+		}
+		
+		@Override
+		public boolean equals(Object other) {
+			RobotCarNode o = (RobotCarNode) other;
+			//return x == o.x && y == o.y && Math.abs(theta - o.theta) < (Math.PI/90);
+			return Math.abs(x - o.x) < ACCUR && Math.abs(y - o.y) < ACCUR && Math.abs(theta - o.theta) < (Math.PI/45);
+		}
+		
+		@Override
+		public int hashCode() {
+			return (int) (100*x + 10*y + theta);
 		}
 		
 	}
@@ -259,9 +320,12 @@ public class RobotCarProblem extends RRTProblem {
         jf.pack();
         jf.setVisible(true);
 		
-		
 	}
 	
+	public void updatePrintNode(RRTNode node) {
+		printNode = node;
+    	jp.repaint();
+	}
 	
 	
 	protected RRTNode getRandomSample() {
@@ -309,6 +373,14 @@ public class RobotCarProblem extends RRTProblem {
             for (int i = 0; i < obstacles.size(); i++) {
             	g2d.draw(obstacles.get(i));
             }
+            
+            //Draw straight paths
+            for (int i = 0; i < paths.size(); i++)
+            	g2d.draw(paths.get(i));
+            
+            //Draw arcs
+            for (int i = 0; i < arcs.size(); i++)
+            	g2d.draw(arcs.get(i));
             
             Color myColor = new Color(0.2f, 0.8f, 0.2f, 0.7f);
             g.setColor(myColor);

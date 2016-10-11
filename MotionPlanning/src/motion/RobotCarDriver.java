@@ -5,14 +5,16 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.List;
 
+import motion.RRTProblem.RRTNode;
+
 public class RobotCarDriver {
 	
 	
 	public static void main(String[] args) throws InvocationTargetException, InterruptedException {
 		
 		int strX = 0;
-		int strY = 30;
-		double startTheta = Math.PI/2;
+		int strY = 0;
+		double startTheta = 0;// Math.PI/2;
 		int glX = 90;
 		int glY = 90;
 		
@@ -35,7 +37,17 @@ public class RobotCarDriver {
         }); 
 		
         
-        car.rrtExploration();
+        List<RRTNode> sol = car.rrtExploration();
+        
+        for (RRTNode node : sol) {
+			try {
+				Thread.sleep(300);
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+        	System.out.println(node);
+        	car.updatePrintNode(node);
+        }
 		
 	}
 	
