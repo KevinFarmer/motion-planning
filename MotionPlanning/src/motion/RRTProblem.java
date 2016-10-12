@@ -18,51 +18,28 @@ public abstract class RRTProblem {
 	}
 	
 	
-	
+	//Explores a search space using a Rapidly Exploring Random Tree
 	public List<RRTNode> rrtExploration() {
 		Tree<RRTNode> rootTree = new Tree<RRTNode>(startNode);
 		List<Tree<RRTNode>> leaves = new ArrayList<Tree<RRTNode>>();
 		
-		//System.out.println(startNode);
-		
 		for (RRTNode n : startNode.getSuccessors()) {
 			Tree<RRTNode> child = rootTree.addLeaf(n);
 			leaves.add(child);
-			//System.out.println(" "+n);
 		}
 		
-		//for (int i = 0; i < 5; i++)
-		//	getRandomSample();
-		
-		//if (true)
-		//	return null;
 		
 		//Continually loop
-		int i = 0;
 		while (leaves.size() > 0) {
+			RRTNode rand = getRandomSample();
 			
-			//Every 100 loops, attempt to connect to the goal
-			RRTNode rand;
-			if (i == 100) {
-				rand = goalNode;
-				i = 0;
-			} else {
-				rand = getRandomSample();
-			}
-			
-			
-			//Loop and find nearest leaf
+			//Find nearest leaf to rand
 			Tree<RRTNode> leafTree = rand.getNearestLeaf(leaves);
-			
-			
-			//System.out.println("\n-"+leafTree);
 			
 			//Expand that leaf
 			for (RRTNode n : (leafTree.getHead()).getSuccessors()) {
-				//System.out.println("  "+n);
 				
 				if (n.goalTest()) {
-					//System.out.println(n);
 					Tree<RRTNode> child = leafTree.addLeaf(n);
 					leaves.add(child);
 					return backtrack(rootTree, child);
@@ -73,26 +50,21 @@ public abstract class RRTProblem {
 			}
 			
 			leaves.remove(leafTree);
-			i++;
 		}
 
-		
 		return null;
 	}
 
 
-	
+	//Return path from the root to the specified leaf node
 	public List<RRTNode> backtrack(Tree<RRTNode> rootTree, Tree<RRTNode> leaf) {
 		List<RRTNode> sol = new ArrayList<RRTNode>();
 		Tree<RRTNode> curr = leaf;
 
-		
 		while (curr != rootTree) {
 			sol.add(0, curr.getHead());
 			curr = curr.getParent();
 		}
-		
-		
 		
 		return sol;
 	}

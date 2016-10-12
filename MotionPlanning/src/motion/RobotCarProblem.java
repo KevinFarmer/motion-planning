@@ -5,7 +5,6 @@ import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
-import java.awt.Rectangle;
 import java.awt.RenderingHints;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Arc2D;
@@ -19,12 +18,10 @@ import java.util.Random;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 
-import motion.RRTProblem.RRTNode;
-
 
 public class RobotCarProblem extends RRTProblem {
 	
-	//private final int VELOCITY = 16;
+	//private final int VELOCITY = 20;
 	private final int CIRC_DIM = 30;
 	private final int ACCUR = 4;
 	
@@ -70,24 +67,18 @@ public class RobotCarProblem extends RRTProblem {
 			x = currX;
 			y = currY;
 			theta = currTheta;	
-			
-			//this.rotatePos(20, -5);
 		}
 		
 		public int getX() { return x; }
 		public int getY() { return y; }
 		
 		public boolean goalTest() { 
-			//return (x == goalX) && (y == goalY); 
 			return Math.abs(x - goalX) < ACCUR && Math.abs(y - goalY) < ACCUR;
 		}
 		
 		
 		//Checks collision between the car and the walls
 		public boolean isIntersect() {
-			if (y == 40) {
-				//System.out.println("here");
-			}
 			Ellipse2D pos = new Ellipse2D.Double(x-CIRC_DIM/2, y-CIRC_DIM/2, 
 												CIRC_DIM, CIRC_DIM);
             for (int i = 0; i < obstacles.size(); i++) {
@@ -101,57 +92,40 @@ public class RobotCarProblem extends RRTProblem {
 		//Returns the six successors positions, unless intersecting with a wall
 		public List<RRTNode> getSuccessors() {
 			List<RRTNode> successors = new ArrayList<RRTNode>();
+			int vel = 20;
 			
 			RRTNode newNode;
 			
-			newNode = rotatePos(20, 1);
-			if (newNode != null) {
-				successors.add(newNode);
-				//return successors;
-			} 
-
-			
-			newNode = rotatePos(20, -1);
-			if (newNode != null) {
-				successors.add(newNode);
-				//return successors;
-			} 
-			
-			newNode = rotatePos(-20, 1);
+			newNode = rotatePos(vel, 1);
 			if (newNode != null)
 				successors.add(newNode);
 			
-			newNode = rotatePos(-20, -1);
+			newNode = rotatePos(vel, -1);
 			if (newNode != null)
 				successors.add(newNode);
 			
-			newNode = rotatePos(20, 0);
+			newNode = rotatePos(-1*vel, 1);
 			if (newNode != null)
 				successors.add(newNode);
 			
-			newNode = rotatePos(-20, 0);
+			newNode = rotatePos(-1*vel, -1);
 			if (newNode != null)
 				successors.add(newNode);
 			
+			newNode = rotatePos(vel, 0);
+			if (newNode != null)
+				successors.add(newNode);
 			
-			/*
-			System.out.println("\n\n\n"+successors.size()+"\n\n\n");
-			for (RRTNode node : successors) {
-				try {
-					Thread.sleep(1000);
-				} catch (InterruptedException e) {
-					e.printStackTrace();
-				}
-				
-				printNode = node;
-				jp.repaint();
-			} */
+			newNode = rotatePos(-1*vel, 0);
+			if (newNode != null)
+				successors.add(newNode);
+			
 			
 			return successors;
 		}
 		
 		
-		//Change return to RobotCarNode
+		//Returns a node for the successor postion based on v and w
 		private RobotCarNode rotatePos(int v, int w) {
 			
 			if (w == 0) {
@@ -176,8 +150,6 @@ public class RobotCarProblem extends RRTProblem {
 			double rotateDir;   //The direction that the point of rotation is in
 			double rotateTheta; //The angle to rotate around the point by
 			
-			//rotateDir = theta + Math.signum(w)*Math.PI/2; //Perpendicular to heading of robot
-			
 			//determine direction of the rotation point
 			if (Math.signum(w) == 1) { //To the left of current heading
 				rotateDir = (theta + Math.PI/2) % (2*Math.PI);
@@ -191,58 +163,28 @@ public class RobotCarProblem extends RRTProblem {
 			} else {
 				rotateTheta = rotateAngle;
 			}
-		
-			//double rotateDir = (theta + rotateAngle) % (2*Math.PI);
 			
 			double newTheta = (theta + rotateTheta) % (2*Math.PI);
 			
 			double l = v/w;
 			int rotateX = (int) (x+ (Math.abs(l)*Math.cos(rotateDir)));
 			int rotateY = (int) (y+ (Math.abs(l)*Math.sin(rotateDir)));
-			
-			//System.out.println("rotateAngle:"+rotateAngle);
-			//System.out.println("rotateDir:"+rotateDir);
-			//System.out.println("rotateTheta:"+rotateTheta);
-			//System.out.println(x+","+y + " : "+theta);
-			//System.out.println("."+rotateX+","+rotateY);
-			
 			int relX = x - rotateX;
 			int relY = y - rotateY;
-			
-			//System.out.println(":"+relX+","+relY);
 			
 			int newRelX = (int) (relX*Math.cos(rotateTheta) - relY*Math.sin(rotateTheta));
 			int newRelY = (int) (relY*Math.cos(rotateTheta) + relX*Math.sin(rotateTheta));
 			
-			//System.out.println(newRelX+ " _ " +newRelY);
-			
 			int newX = rotateX + newRelX;
 			int newY = rotateY + newRelY;
 			
-			//System.out.println(newX+" "+newY+" : "+newTheta+"\n");
 			RobotCarNode newNode = new RobotCarNode(newX, newY, newTheta);
 			if (!newNode.isIntersect()) {
-
+				//Add this path to the drawing
 				Path2D.Double path = new Path2D.Double();
 				path.moveTo(x, y);
 				path.lineTo(newX, newY);
 				paths.add(path);
-				/*
-				int wid = Math.abs(rotateX - x);
-				double start, rot;
-				double curveTheta = Math.signum(w)*rotateAngle;
-				//start = Math.toDegrees((2*Math.PI - theta)% (2*Math.PI));
-				start = 360 - (180+Math.toDegrees(rotateDir))%180;
-				//start = Math.toDegrees(rotateDir);
-				rot = Math.toDegrees(curveTheta);
-
-				System.out.println(Math.toDegrees(rotateDir));
-				System.out.println("s:"+start+" e:"+rot);
-				System.out.println("rot: "+rotateX+","+rotateY);
-				Arc2D.Double arc = new Arc2D.Double(rotateX-wid, rotateY-wid, 2*wid, 2*wid, 
-						start, -1*Math.signum(w)*Math.signum(l)*rot, Arc2D.OPEN);
-				arcs.add(arc); */
-				
 				return newNode;
 			} else {
 				return null;
@@ -286,8 +228,8 @@ public class RobotCarProblem extends RRTProblem {
 		@Override
 		public boolean equals(Object other) {
 			RobotCarNode o = (RobotCarNode) other;
-			//return x == o.x && y == o.y && Math.abs(theta - o.theta) < (Math.PI/90);
-			return Math.abs(x - o.x) < ACCUR && Math.abs(y - o.y) < ACCUR && Math.abs(theta - o.theta) < (Math.PI/45);
+			return Math.abs(x - o.x) < ACCUR && Math.abs(y - o.y) < ACCUR 
+					&& Math.abs(theta - o.theta) < (Math.PI/45);
 		}
 		
 		@Override
@@ -355,7 +297,7 @@ public class RobotCarProblem extends RRTProblem {
         	g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
                     RenderingHints.VALUE_ANTIALIAS_ON);
         	
-        	g.setColor(Color.BLACK);
+        	g2d.setColor(Color.BLACK);
             
             if(printNode.isIntersect()) {
             	setBackground(Color.red);
@@ -384,23 +326,12 @@ public class RobotCarProblem extends RRTProblem {
             
             Color myColor = new Color(0.2f, 0.8f, 0.2f, 0.7f);
             g.setColor(myColor);
-            //g2d.drawLine(0,0,0,0);
-
             g2d.fillOval(printNode.getX()-CIRC_DIM/2, printNode.getY()-CIRC_DIM/2, CIRC_DIM, CIRC_DIM);
             
             myColor = new Color(0.8f, 0.2f, 0.2f, 0.7f);
             g.setColor(myColor);
             g2d.fillOval(goalX-CIRC_DIM/2, goalY-CIRC_DIM/2, CIRC_DIM, CIRC_DIM);
             
-            /*
-            Point[] points = printNode.getPoints();
-            g2d.drawLine(0, 0, points[0].x, points[0].y);
-            
-            //Draw robot arm
-            for (int i = 0; i < numSegments-1; i++) {
-            	//System.out.println("("+points[i].x+", "+points[i].y+")");
-            	g2d.drawLine(points[i].x, points[i].y, points[i+1].x, points[i+1].y);
-            } */
         }
 
         @Override
