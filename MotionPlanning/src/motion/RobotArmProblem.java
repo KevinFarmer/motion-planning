@@ -305,6 +305,7 @@ public class RobotArmProblem {//extends RobotSearch {
 		return solution;
 	}
 
+	/*
 	//A* search on a maze, modified from previous homework assignment
 	private List<RobotArmNode> AStarSearch() {
 		
@@ -322,13 +323,6 @@ public class RobotArmProblem {//extends RobotSearch {
 		while (frontier.size() > 0) {
 			currNode = frontier.poll();
 
-			/*
-			if (distance.containsKey(currNode)) {
-				int d = currNode.getDist();
-				if (d > distance.get(currNode)) {
-					continue; //then skip this one
-				}
-			} */
 			double currDist = distance.get(currNode);
 
 			
@@ -359,7 +353,7 @@ public class RobotArmProblem {//extends RobotSearch {
 		}
 		
 		return null;
-	}
+	} */
     
     
     
