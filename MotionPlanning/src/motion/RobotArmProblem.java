@@ -20,27 +20,23 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.PriorityQueue;
 import java.util.Queue;
 import java.util.Random;
 
 
 
-public class RobotArmProblem {//extends RobotSearch {
+public class RobotArmProblem {
 	
-	private final int CIRC_DIM = 30;
 	private final double RESOLUTION = Math.PI/90; //1 degree increments
-	private final int TOTAL_SAMPLES = 5000;
 	private int totalSamples = 10;
 
 	private int[] length;
 	private int numSegments;
-	private Point[] obstacles;
+	private Rectangle[] obstacles;
 	
 	private RobotArmGraph graph;
 	private RobotArmNode startNode;
 	private RobotArmNode goalNode;
-	private HashMap<RobotArmNode, Double> distance;
 	
 	//Used for graphics printing
 	private JPanel jp;
@@ -48,27 +44,23 @@ public class RobotArmProblem {//extends RobotSearch {
 	
 
 	
-	public RobotArmProblem(double[] strAngles, double[] goalAngles, int[] ln, int k, Point[] obs) {
+	public RobotArmProblem(double[] strAngles, double[] goalAngles, int[] ln, int k, Rectangle[] rect) {
 		startNode = new RobotArmNode(strAngles);
 		goalNode = new RobotArmNode(goalAngles);
 		length = ln;
 		numSegments = k;
-		obstacles = obs;
+		obstacles = rect;
 		printNode = new RobotArmNode(strAngles);
 		graph = null;
 		
-		for (int i = 0; i < k; i++)
-			totalSamples = 10*totalSamples;
+		for (int i = 0; i < k; i++) {
+			if (i <= 2)
+				totalSamples = 10*totalSamples;
+			else
+				totalSamples = 2*totalSamples;
+		}
+		System.out.println("Using "+totalSamples+" total samples.");
 	}
-	
-	
-	/*
-	public void printStart() {
-		Point[] points = startNode.getPoints();
-		for (int i = 0; i < numSegments; i++) 
-			System.out.println("("+points[i].x+", "+points[i].y+")");
-	} */
-	
 	
 	
 	//Sum the total length of the robot arm
@@ -83,7 +75,7 @@ public class RobotArmProblem {//extends RobotSearch {
 	
 	
     public void createAndShowGUI() {
-    	int dim = 100 + 2*sumLength();
+    	int dim = 40 + 2*sumLength();
     	
         //Create and set up the window.
         JFrame jf = new JFrame("RobotArm");
@@ -106,17 +98,8 @@ public class RobotArmProblem {//extends RobotSearch {
     
     
     public void updatePrintNode(double[] theta) {
-	
     	printNode = new RobotArmNode(theta);
-    	//System.out.println(jp);
     	jp.repaint();
-    	
-		/*try {
-			Thread.sleep(200);
-		} catch (InterruptedException e) {
-			e.printStackTrace();
-		} */
-    	
     }	
     
     
@@ -126,8 +109,6 @@ public class RobotArmProblem {//extends RobotSearch {
     //Arg k: the number of vertices to link to
     public List<RobotArmNode> PRM(int k) {
     	List<RobotArmNode> sol = new ArrayList<RobotArmNode>();
-    	//RobotArmNode startNode = new RobotArmNode(theta);
-    	//RobotArmNode goalNode = new RobotArmNode(goal);
     	
     	if (startNode.isIntersect() || goalNode.isIntersect()) {
     		System.out.println("Invalid input");
@@ -157,8 +138,6 @@ public class RobotArmProblem {//extends RobotSearch {
     	System.out.println("BFS done");
     	
     	
-    	
-    	
     	return sol;
     } 
     
@@ -169,14 +148,7 @@ public class RobotArmProblem {//extends RobotSearch {
     	
     	//Randomly generate TOTAL_SAMPLES points in configuration space
     	int samp = 0; 
-    	
-    	//System.out.println(totalSamples);
-    	
-
-    	
-    	while (samp < TOTAL_SAMPLES) {
-    		
-    		System.out.println("here3");
+    	while (samp < totalSamples) {
     		
     		double[] randTheta = new double[numSegments];
     		double x;
@@ -229,12 +201,7 @@ public class RobotArmProblem {//extends RobotSearch {
 			}
 			i++;
 			
-			//for (int j = 0; j < successors.get(i).theta.length; j++)
-			//	System.out.print(successors.get(i).theta[j]+" ");
-			//System.out.println(successors.get(i).getPoints()[numSegments-1]);
-			
 		}
-		//System.out.println(); 
 		
 	}
     
@@ -288,7 +255,7 @@ public class RobotArmProblem {//extends RobotSearch {
 		return backchain(goal, visited);
 	}
 	
-	// backchain should only be used by bfs, not the recursive dfs
+	// backchain used by BFS
 	private List<RobotArmNode> backchain(RobotArmNode node,
 			HashMap<RobotArmNode, RobotArmNode> visited) {
 		
@@ -310,7 +277,7 @@ public class RobotArmProblem {//extends RobotSearch {
 	private List<RobotArmNode> AStarSearch() {
 		
 		HashMap<RobotArmNode, RobotArmNode> visited = new HashMap<RobotArmNode, RobotArmNode>();
-		distance = new HashMap<RobotArmNode, Double>();
+		HashMap<RobotArmNode, Double> distance = new HashMap<RobotArmNode, Double>();
 		PriorityQueue<RobotArmNode> frontier = new PriorityQueue<RobotArmNode>();
 		frontier.add(startNode);
 		
@@ -405,16 +372,8 @@ public class RobotArmProblem {//extends RobotSearch {
 		
 		//Returns true if there is an intersection
 		public boolean isIntersect() {
-			//Rectangle[] circ = new Rectangle[obstacles.length];
-			Rectangle[] rect = new Rectangle[obstacles.length];
 			Point[] points = getPoints();
 			Line2D[] lines = new Line2D[numSegments];
-			
-			//Ellipse2D.Double circle = new Ellipse2D.Double(x, y, diameter, diameter);
-			
-			for (int i = 0; i < obstacles.length; i++){
-				rect[i] = new Rectangle(obstacles[i].x, obstacles[i].y, CIRC_DIM, CIRC_DIM);
-			}
 			
 			lines[0] = new Line2D.Double(0,0, points[0].x, points[0].y);
 			for (int i = 0; i < numSegments-1; i++) {
@@ -425,9 +384,9 @@ public class RobotArmProblem {//extends RobotSearch {
 				lines[i+1] = new Line2D.Double(x1, y1, x2, y2);
 			}
 			
-			for (int i = 0; i < rect.length; i++) {
+			for (int i = 0; i < obstacles.length; i++) {
 				for (int j = 0; j < numSegments; j++) {
-					if (rect[i].intersectsLine(lines[j]))
+					if (obstacles[i].intersectsLine(lines[j]))
 						return true;
 				}
 			}
@@ -443,29 +402,11 @@ public class RobotArmProblem {//extends RobotSearch {
 	    	RobotArmNode currNode;
 	    	boolean connect = true;
 	    	
-	    	//for (int i = 0; i < theta.length; i++) {
-	    	//	System.out.println(currTheta[i]+"   "+other.theta[i]);
-	    	//}
-	    	
-			/*updatePrintNode(currTheta);
-			try {
-				Thread.sleep(100);
-			} catch (InterruptedException e) {
-				e.printStackTrace();
-			} */
-			
-	    	//System.out.println(theta.length);
 	    	
 	    	//Rotate in closest direction
 	    	for (int i = 0; i < theta.length; i++) {
 	    		int rotateDir;
-	    		double diff = other.theta[i] - theta[i]; //other.theta[i] is goal, theta[i] is start
-	    		//double opp = (other.theta[i] + Math.PI) % (2*Math.PI); //Gets angle opposite on circle
-	    		
-	    		/*if (theta[i] > other.theta[i] || theta[i] < opp)
-	    			rotateDir = -1;
-	    		else
-	    			rotateDir = 1; */
+	    		double diff = other.theta[i] - theta[i];
 	    		
 	    		double absDiff = Math.abs(diff);
 	    		
@@ -478,101 +419,29 @@ public class RobotArmProblem {//extends RobotSearch {
 	    		else //If absDiff > Math.PI && diff < 0
 	    			rotateDir = 1;
 	    		
-	    		//System.out.println("\n--"+theta[i]+ "  " + other.theta[i] + "  " + diff + "  " +absDiff);
-	    		
-	    		//updatePrintNode(currTheta);
 	    		while (currTheta[i] != other.theta[i]) {
-	    			//updatePrintNode(currTheta);
-		    		//System.out.println("here2");
-	    			
+
 	    			double temp = (Math.abs(other.theta[i] - currTheta[i]) % (2*Math.PI));
 	    			
 	    			if (temp > RESOLUTION ) {
-			    		//System.out.print("here3  ");
 	    				currTheta[i] += rotateDir*RESOLUTION;
 	    			} else {
-			    		//System.out.println("here4");
 	    				currTheta[i] = other.theta[i];
 	    			}
-	    			
-	    			//System.out.println(" - " +currTheta[i] + "  " + other.theta[i] + "  t:"+temp+ " -- " +RESOLUTION);
 	    			
 	    			currTheta[i] = currTheta[i] % (2*Math.PI);
 	    			currNode = new RobotArmNode(currTheta);
 	    			if (currNode.isIntersect()) {
-	    				//System.out.println("\n\nIntersection" + currNode+ "\n\n");
 	    				return false;
 	    			}
-	    				//connect = false;
-	    			
-	    			
-	    			/*try {
-	    				Thread.sleep(100);
-	    			} catch (InterruptedException e) {
-	    				e.printStackTrace();
-	    			} 
-	    			updatePrintNode(currTheta); */
-	    		}  /*
-	    		if (connect == false)
-	    			currTheta[i] = theta[i];
-	    		while (currTheta[i] != other.theta[i] && connect == false) {
-	    			currNode = new RobotArmNode(currTheta);
-	    			double temp = (Math.abs(currTheta[i] - other.theta[i]) % (2*Math.PI));
-	    			if (temp > RESOLUTION ) {
-	    				currTheta[i] -= RESOLUTION;
-	    			} else {
-	    				currTheta[i] = other.theta[i];
-	    			}
-	    			
-	    			currTheta[i] = currTheta[i] % (2*Math.PI);
-	    			
-	    			if (currNode.isIntersect()) {
-	    				//if (connect == false)
-	    					return false;
-	    				
-	    			}
-	    		
-	    			/*try {
-	    				Thread.sleep(100);
-	    			} catch (InterruptedException e) {
-	    				e.printStackTrace();
-	    			}
-	    			updatePrintNode(currTheta); 
-	    		} 
-	    		connect = true; */
+	    		}  
 	    	}
-	    	/*
-	    	currTheta = Arrays.copyOf(theta, theta.length);
-	    	//Rotate clockwise
-	    	for (int i = 0; i < theta.length; i++) {
-	    		while (currTheta[i] != other.theta[i]) {
-	    			currNode = new RobotArmNode(currTheta);
-	    			double temp = (Math.abs(currTheta[i] - other.theta[i]) % (2*Math.PI));
-	    			if (temp > RESOLUTION ) {
-	    				currTheta[i] -= RESOLUTION;
-	    			} else {
-	    				currTheta[i] = other.theta[i];
-	    			}
-	    			
-	    			currTheta[i] = currTheta[i] % (2*Math.PI);
-	    			
-	    			if (currNode.isIntersect())
-	    				connect = false;
-	    		
-	    			try {
-	    				Thread.sleep(100);
-	    			} catch (InterruptedException e) {
-	    				e.printStackTrace();
-	    			}
-	    			updatePrintNode(currTheta);
-	    		}
-	    	}
-	    	*/
+
 	    	return connect;
 	    }
 	    
 	    
-	    //Gets the Euclidean distance to the end of the other arm
+	    //Gets the distance between the angles of two arms
 	    public Double getDist(RobotArmNode other) {
 	    	double sum = 0;
 	    	for (int i = 0; i < numSegments; i++) {
@@ -584,14 +453,7 @@ public class RobotArmProblem {//extends RobotSearch {
 	    		
 	    			sum += diff;
 	    	}
-	    	//System.out.println(other + "   d:"+sum);
 	    	return sum;
-	    	/*
-	    	Point end = getPoints()[numSegments-1];
-	    	Point oEnd = other.getPoints()[numSegments-1];
-	    	int xDist = Math.abs(end.x - oEnd.x);
-	    	int yDist = Math.abs(end.y - oEnd.y);
-	    	return (int) Math.sqrt(xDist*xDist + yDist*yDist) + sum; */
 	    }
 	    
 	    
@@ -615,12 +477,6 @@ public class RobotArmProblem {//extends RobotSearch {
 	    	}
 	    	return hash;
 	    }
-
-
-		//@Override
-		//public boolean goalTest() {
-		//	return this.equals(goalNode);
-		//}
 		
 		public String toString() {
 			String s = "";
@@ -630,27 +486,7 @@ public class RobotArmProblem {//extends RobotSearch {
 			}
 			return s+")";
 		}
-
-		/*
-		@Override
-		public int compareTo(RobotArmNode other) {
-			double pred = 0, oPred = 0;
-			for (int i = 0; i < numSegments; i++) {
-				pred += Math.abs(theta[i] - goalNode.theta[i]);
-				oPred += Math.abs(other.theta[i] - goalNode.theta[i]);
-			}
-			
-			//if (distance == null)
-			//	return -1;
-			if (distance == null)
-				return Double.valueOf(pred).compareTo(oPred);
-
-			double d1 = dist+pred;
-			double d2 = other.dist+oPred;
-			return Double.valueOf(d1).compareTo(d2);
-		} */
-
-		
+	
 	}
 
 	
@@ -674,24 +510,21 @@ public class RobotArmProblem {//extends RobotSearch {
             	setBackground(Color.white);
             }
 
-            //This centers (0, 0)
+            //This centers (0, 0) in the GUI
             AffineTransform tform = AffineTransform.getTranslateInstance( getWidth()/2, getHeight()/2);
             tform.scale( 1, -1);
             g2d.setTransform(tform);
             
             //Draw obstacles
             for (int i = 0; i < obstacles.length; i++)
-            	//g2d.fill(new Ellipse2D.Double(obstacles[i].x, obstacles[i].y, CIRC_DIM, CIRC_DIM));
-            	g2d.fillRect(obstacles[i].x, obstacles[i].y, CIRC_DIM, CIRC_DIM);
+            	g2d.fill(obstacles[i]);
             
             Point[] points = printNode.getPoints();
             g2d.drawLine(0, 0, points[0].x, points[0].y);
             
             //Draw robot arm
-            for (int i = 0; i < numSegments-1; i++) {
-            	//System.out.println("("+points[i].x+", "+points[i].y+")");
+            for (int i = 0; i < numSegments-1; i++)
             	g2d.drawLine(points[i].x, points[i].y, points[i+1].x, points[i+1].y);
-            }
         }
 
         @Override
