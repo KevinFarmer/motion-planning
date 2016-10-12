@@ -28,7 +28,6 @@ public abstract class RRTProblem {
 			leaves.add(child);
 		}
 		
-		
 		//Continually loop
 		while (leaves.size() > 0) {
 			RRTNode rand = getRandomSample();
@@ -38,7 +37,6 @@ public abstract class RRTProblem {
 			
 			//Expand that leaf
 			for (RRTNode n : (leafTree.getHead()).getSuccessors()) {
-				
 				if (n.goalTest()) {
 					Tree<RRTNode> child = leafTree.addLeaf(n);
 					leaves.add(child);
@@ -48,13 +46,13 @@ public abstract class RRTProblem {
 				Tree<RRTNode> child = leafTree.addLeaf(n);
 				leaves.add(child);
 			}
-			
 			leaves.remove(leafTree);
 		}
 
 		return null;
 	}
 
+	
 
 	//Return path from the root to the specified leaf node
 	public List<RRTNode> backtrack(Tree<RRTNode> rootTree, Tree<RRTNode> leaf) {

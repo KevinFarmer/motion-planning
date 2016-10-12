@@ -20,6 +20,7 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.PriorityQueue;
 import java.util.Queue;
 import java.util.Random;
 
@@ -27,7 +28,7 @@ import java.util.Random;
 
 public class RobotArmProblem {
 	
-	private final double RESOLUTION = Math.PI/90; //1 degree increments
+	private final double RESOLUTION = Math.PI/90; //2 degree increments
 	private int totalSamples = 10;
 
 	private int[] length;
@@ -45,8 +46,8 @@ public class RobotArmProblem {
 
 	
 	public RobotArmProblem(double[] strAngles, double[] goalAngles, int[] ln, int k, Rectangle[] rect) {
-		startNode = new RobotArmNode(strAngles);
-		goalNode = new RobotArmNode(goalAngles);
+		//startNode = new RobotArmNode(strAngles);
+		//goalNode = new RobotArmNode(goalAngles);
 		length = ln;
 		numSegments = k;
 		obstacles = rect;
@@ -57,8 +58,9 @@ public class RobotArmProblem {
 			if (i <= 2)
 				totalSamples = 10*totalSamples;
 			else
-				totalSamples = 2*totalSamples;
+				totalSamples = 4*totalSamples;
 		}
+		
 		System.out.println("Using "+totalSamples+" total samples.");
 	}
 	
@@ -107,8 +109,10 @@ public class RobotArmProblem {
 
     
     //Arg k: the number of vertices to link to
-    public List<RobotArmNode> PRM(int k) {
+    public List<RobotArmNode> PRM(int k, double[] theta, double[] goal) {
     	List<RobotArmNode> sol = new ArrayList<RobotArmNode>();
+    	startNode = new RobotArmNode(theta);
+    	goalNode = new RobotArmNode(goal);
     	
     	if (startNode.isIntersect() || goalNode.isIntersect()) {
     		System.out.println("Invalid input");
@@ -120,8 +124,12 @@ public class RobotArmProblem {
     		graph = genRobotGraph();
     		System.out.println("Nodes generated.\nCreating edges...");
     	
+    		int i = 0;
     		for (RobotArmNode node : graph.getKeySet()) {
     			getNeighbors(node, graph, k);
+    			
+    			//System.out.println(i);
+    			i++;
     		}
     	}
     	
@@ -142,11 +150,11 @@ public class RobotArmProblem {
     } 
     
     
-    //Generates a graph
+    //Generates a graph with no edges
     private RobotArmGraph genRobotGraph() {
     	RobotArmGraph graph = new RobotArmGraph();
     	
-    	//Randomly generate TOTAL_SAMPLES points in configuration space
+    	//Randomly generate totalSamples points in configuration space
     	int samp = 0; 
     	while (samp < totalSamples) {
     		
@@ -166,7 +174,6 @@ public class RobotArmProblem {
     			samp++;
     		}
     	}
-    	
     	
     	return graph;
     }
@@ -194,23 +201,19 @@ public class RobotArmProblem {
 			//Add edge
 			RobotArmNode adjNode = successors.get(i);
 			if (node.connectNode(adjNode)) {
-				if(!graph.containsNode(adjNode))
-					graph.addNode(adjNode);
+				//if(!graph.containsNode(adjNode))
+				//	graph.addNode(adjNode);
 				graph.addEdge(node, adjNode);
 
 			}
 			i++;
-			
 		}
-		
 	}
     
     
 	
 	//Modified from Hwk1, works but doesn't take into account distance between points
 	private List<RobotArmNode> robotBFS() {
-		//List<RobotArmNode> sol = new ArrayList<RobotArmNode>();
-		
 		Queue<RobotArmNode> frontier = new LinkedList<RobotArmNode>();
 		HashMap<RobotArmNode, RobotArmNode> visited = 
 				new HashMap<RobotArmNode, RobotArmNode>();
@@ -232,15 +235,11 @@ public class RobotArmProblem {
 					goal = successors.get(i);
 					visited.put(successors.get(i), currNode);
 					
-					//incrementNodeCount();
-					//updateMemory(visited.size());
 					break;
 				} else if (!visited.containsKey(successors.get(i))){ //If unvisited
 					frontier.add(successors.get(i));
 					visited.put(successors.get(i), currNode);
-					//incrementNodeCount();
 				}
-				//updateMemory(visited.size());
 			}
 			currNode = frontier.poll();
 			if (currNode == null)
@@ -278,19 +277,30 @@ public class RobotArmProblem {
 		
 		HashMap<RobotArmNode, RobotArmNode> visited = new HashMap<RobotArmNode, RobotArmNode>();
 		HashMap<RobotArmNode, Double> distance = new HashMap<RobotArmNode, Double>();
-		PriorityQueue<RobotArmNode> frontier = new PriorityQueue<RobotArmNode>();
+		List<RobotArmNode> frontier = new ArrayList<RobotArmNode>();
 		frontier.add(startNode);
 		
 		visited.put(startNode, null);
 		distance.put(startNode, 0.0);
 		startNode.updateDist(0);
 		
-		RobotArmNode currNode;
+		RobotArmNode currNode = startNode;
+		double currDist = currNode.getDistFromStart();
+		
+    	// Sorting
+    	Collections.sort(frontier, new Comparator<RobotArmNode>() {
+    	        @Override
+    	        public int compare(RobotArmNode node1, RobotArmNode node2) {
+    	        	double dist1 = currDist + currNode.getDist(node1);
+    	        	double dist2 = currDist + currNode.getDist(node2);
+    	            return  Double.valueOf(dist1).compareTo(dist2);
+    	        }
+    	    });
 		
 		while (frontier.size() > 0) {
-			currNode = frontier.poll();
+			currNode = frontier.remove(0);
 
-			double currDist = distance.get(currNode);
+			currDist = distance.get(currNode);
 
 			
 			List<RobotArmNode> adj = graph.getAdj(currNode);
@@ -301,7 +311,7 @@ public class RobotArmProblem {
 					return backchain(node, visited);
 				}
 
-				double dist = currDist + currNode.getDistToNode(node);
+				double dist = currDist + currNode.getDist(node);
 				node.updateDist(dist);
 				
 				if (!visited.containsKey(node)) { //If never seen, add
@@ -335,15 +345,10 @@ public class RobotArmProblem {
 		}
 		
 		public double[] getTheta() { return theta; }
-		public void updateDist(double d) { dist = d; }
 		
-		public double getDistToNode(RobotArmNode other) {
-			double sum = 0; 
-			for (int i = 0; i < numSegments; i++) {
-				sum += Math.abs(theta[i] - other.theta[i]);
-			}
-			return sum;
-		}
+		//public void updateDist(double d) { dist = d; }
+		//public double getDistFromStart() { return dist; }
+		
 		
 		//Returns the current set of points, excluding the origin
 		public Point[] getPoints() {
@@ -399,9 +404,7 @@ public class RobotArmProblem {
 	    //Returns true if one can get to other from this node
 	    public boolean connectNode(RobotArmNode other) {
 	    	double[] currTheta = Arrays.copyOf(theta, theta.length);
-	    	RobotArmNode currNode;
-	    	boolean connect = true;
-	    	
+	    	RobotArmNode currNode;	    	
 	    	
 	    	//Rotate in closest direction
 	    	for (int i = 0; i < theta.length; i++) {
@@ -431,13 +434,14 @@ public class RobotArmProblem {
 	    			
 	    			currTheta[i] = currTheta[i] % (2*Math.PI);
 	    			currNode = new RobotArmNode(currTheta);
+	    			//updatePrintNode(currTheta);
 	    			if (currNode.isIntersect()) {
 	    				return false;
 	    			}
 	    		}  
 	    	}
 
-	    	return connect;
+	    	return true;
 	    }
 	    
 	    

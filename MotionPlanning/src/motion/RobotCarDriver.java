@@ -15,17 +15,17 @@ public class RobotCarDriver {
 		List<Line2D.Double> obstacles = new ArrayList<Line2D.Double>(); //Add points in pairs
 		
 		//Simple problem 
-		
+		/*
 		int strX = 0;
 		int strY = 0;
 		double startTheta = 0;
 		int glX = 90;
 		int glY = 90;
 		int dim = 400;
-		
+		*/
 		
 		//Problem with two walls
-		/*
+		
 		int strX = -150;
 		int strY = -100;
 		double startTheta = 0;
@@ -34,7 +34,7 @@ public class RobotCarDriver {
 		int dim = 400;
 		obstacles.add(new Line2D.Double(-50, 50, 200, 50));
 		obstacles.add(new Line2D.Double(-200, -50, 100, -50));
-		*/
+		
 		
 		
 		//Complex problem
@@ -75,6 +75,8 @@ public class RobotCarDriver {
         	System.out.println(node);
         	car.updatePrintNode(node);
         }
+        
+        System.out.println("\nDone!");
 		
 	}
 	

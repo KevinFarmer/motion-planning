@@ -12,30 +12,70 @@ public class RobotArmDriver {
 	private static int RECT_DIM = 30;
 	
 	public static void main(String[] args) throws InvocationTargetException, InterruptedException {
+		
+		
 		int k = 10; //k param in PRM
-		int numSegments;
-		int numObstacles = 5;
+		int numSegments = 2; //Set numSegments to 2, 3 or 4
+		int numObstacles = 15; //Set to be 5, or 15
+
 		
 		Rectangle[] rect = new Rectangle[numObstacles];
-		rect[0] = new Rectangle(60, -50, RECT_DIM, RECT_DIM);
-		rect[1] = new Rectangle(163, 94, RECT_DIM, RECT_DIM);
-		rect[2] = new Rectangle(-130, -70, RECT_DIM, RECT_DIM);
-		rect[3] = new Rectangle(2, 100, RECT_DIM, RECT_DIM);
-		rect[4] = new Rectangle(2, -90, RECT_DIM, RECT_DIM);
-
-
-		//numSegments = 2;
-		//double[] theta = {Math.PI*3/2, Math.PI*3/2};
-		//double[] goal = {0, Math.PI/2};
+		if (numObstacles == 5) {
+			rect[0] = new Rectangle(60, -50, RECT_DIM, RECT_DIM);
+			rect[1] = new Rectangle(163, 94, RECT_DIM, RECT_DIM);
+			rect[2] = new Rectangle(-130, -70, RECT_DIM, RECT_DIM);
+			rect[3] = new Rectangle(2, 100, RECT_DIM, RECT_DIM);
+			rect[4] = new Rectangle(2, -90, RECT_DIM, RECT_DIM);
+		}
+		if (numObstacles == 15) {
+			rect[0] = new Rectangle(80, -150, RECT_DIM, RECT_DIM);
+			rect[1] = new Rectangle(163, 94, RECT_DIM, RECT_DIM);
+			rect[2] = new Rectangle(-130, -70, RECT_DIM, RECT_DIM);
+			rect[3] = new Rectangle(2, 110, RECT_DIM, RECT_DIM);
+			rect[4] = new Rectangle(2, -90, RECT_DIM, RECT_DIM);
+			rect[5] = new Rectangle(102, 30, RECT_DIM, RECT_DIM);
+			rect[6] = new Rectangle(10, -190, RECT_DIM, RECT_DIM);
+			rect[7] = new Rectangle(-130, 40, RECT_DIM, RECT_DIM);
+			rect[8] = new Rectangle(-90, -150, RECT_DIM, RECT_DIM);
+			rect[9] = new Rectangle(-30, 190, RECT_DIM, RECT_DIM);
+			rect[10] = new Rectangle(140, -40, RECT_DIM, RECT_DIM);
+			rect[11] = new Rectangle(-40, -300, RECT_DIM, RECT_DIM);
+			rect[12] = new Rectangle(100, -250, RECT_DIM, RECT_DIM);
+			rect[13] = new Rectangle(-100, 160, RECT_DIM, RECT_DIM);
+			rect[14] = new Rectangle(140, 200, RECT_DIM, RECT_DIM);
+		}
 		
-		numSegments = 4;
-		double[] theta = {Math.PI*6/4, 0, Math.PI/4, 0};
-		double[] goal = {0, Math.PI*3/2, Math.PI/2, Math.PI*3/2};
+		double[] theta = new double[numSegments];
+		double[] goal = new double[numSegments];
+		if (numSegments == 2) {
+			theta[0] = Math.PI*3/2;
+			theta[1] = Math.PI*3/2;
+			goal[0] = 0;
+			goal[1] = Math.PI/2;
+		}
+		
+		if (numSegments == 3) {
+			theta[0] = 0;
+			theta[1] = Math.PI*3/2;
+			theta[2] = Math.PI*3/2;
+			
+			goal[0] = Math.PI*3/2;
+			goal[1] = 0;
+			goal[2] = Math.PI/2;
+		}
 		
 		
-		//numSegments = 3;
-		//double[] theta = {0, Math.PI*3/2, Math.PI*3/2};
-		//double[] goal = {Math.PI*3/2, 0, Math.PI/2};
+		if (numSegments == 4) {
+			theta[0] = Math.PI*13/12;
+			theta[1] = Math.PI*23/12;
+			theta[2] = Math.PI/4;
+			theta[3] = Math.PI*3/2;
+			
+			goal[0] = 0;
+			goal[1] = Math.PI/2;
+			goal[2] = 0;
+			goal[3] = 0;
+		}
 		 
 
 		
@@ -52,7 +92,7 @@ public class RobotArmDriver {
         }); 
         
 		
-		List<RobotArmNode> sol = arm.PRM(k);
+		List<RobotArmNode> sol = arm.PRM(k, theta, goal);
 		if (sol != null){
 			for (RobotArmNode n : sol) {
 				arm.updatePrintNode(n.getTheta());
@@ -72,20 +112,33 @@ public class RobotArmDriver {
 		
 		System.out.println("\nDone!");
 		
-		/*
-		double[] theta2 = {Math.PI*3/2, Math.PI*5/4 , Math.PI*3/2};
-		double[] goal2 = {Math.PI/2, 0, Math.PI*3/2}; 
-		sol = arm.PRM(k, theta2, goal2);
-		if (sol != null){
-			for (RobotArmNode n : sol) {
-				arm.updatePrintNode(n.getTheta());
-				try {
-					Thread.sleep(500);
-				} catch (InterruptedException e) {
-					e.printStackTrace();
+		//If using 4 segments, do a second query
+		if (numSegments == 4) {
+			System.out.println("Starting next query...");
+			theta[0] = Math.PI *3/2;
+			theta[1] = 0;
+			theta[2] = Math.PI/4;
+			theta[3] = 0;
+			
+			goal[0] = 0;
+			goal[1] = Math.PI*3/2;
+			goal[2] = Math.PI/2;
+			goal[3] = Math.PI*3/2;
+			
+			sol = arm.PRM(k, theta, goal);
+			if (sol != null){
+				for (RobotArmNode n : sol) {
+					arm.updatePrintNode(n.getTheta());
+					try {
+						Thread.sleep(500);
+					} catch (InterruptedException e) {
+						e.printStackTrace();
+					}
 				}
-			}
-		} */
+			} 
+		}
+ 
+
 		
 		
 		

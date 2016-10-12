@@ -146,7 +146,7 @@ public class RobotCarProblem extends RRTProblem {
 				}			
 			}
 			
-			double rotateAngle = Math.PI/4; //temp  -----------------------
+			double rotateAngle = Math.PI/4; //The amount to rotate around the arc
 			double rotateDir;   //The direction that the point of rotation is in
 			double rotateTheta; //The angle to rotate around the point by
 			
@@ -166,12 +166,13 @@ public class RobotCarProblem extends RRTProblem {
 			
 			double newTheta = (theta + rotateTheta) % (2*Math.PI);
 			
-			double l = v/w;
-			int rotateX = (int) (x+ (Math.abs(l)*Math.cos(rotateDir)));
-			int rotateY = (int) (y+ (Math.abs(l)*Math.sin(rotateDir)));
-			int relX = x - rotateX;
+			double l = Math.abs(v/w);
+			int rotateX = (int) (x+ (l*Math.cos(rotateDir))); //Point to rotate around
+			int rotateY = (int) (y+ (l*Math.sin(rotateDir)));
+			int relX = x - rotateX; //Coords relative to rotation point
 			int relY = y - rotateY;
 			
+			//New coords relative to rotation point
 			int newRelX = (int) (relX*Math.cos(rotateTheta) - relY*Math.sin(rotateTheta));
 			int newRelY = (int) (relY*Math.cos(rotateTheta) + relX*Math.sin(rotateTheta));
 			
