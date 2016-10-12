@@ -24,38 +24,26 @@ public class RobotArmDriver {
 		
 		
 		
-		//numSegments = 2;
-		//double[] theta = {Math.PI*3/2, Math.PI*3/2};
-		//double[] goal = {0, Math.PI/2};
+		numSegments = 2;
+		double[] theta = {Math.PI*3/2, Math.PI*3/2};
+		double[] goal = {0, Math.PI/2};
 		
 		//numSegments = 4;
 		//double[] theta = {Math.PI*6/4, 0, Math.PI/4, 0};
 		//double[] goal = {0, Math.PI*3/2, Math.PI/2, Math.PI*3/2};
 		
-		numSegments = 3;
-		double[] theta = {0, Math.PI*3/2, Math.PI*3/2};
-		double[] goal = {Math.PI*3/2, 0, Math.PI/2}; /*
-		double[] theta2 = {Math.PI*3/2, Math.PI*5/4 , Math.PI*3/2};
-		double[] goal2 = {Math.PI/2, 0, Math.PI*3/2}; */
+		//numSegments = 3;
+		//double[] theta = {0, Math.PI*3/2, Math.PI*3/2};
+		//double[] goal = {Math.PI*3/2, 0, Math.PI/2};
+
 
 		
 		int[] ln = new int[numSegments];
 		for (int i = 0; i < numSegments; i++)
 			ln[i] = 100;
 		
-
-		
 		RobotArmProblem arm = new RobotArmProblem(theta, goal, ln, numSegments, obstacles);
-		//RobotArmNode start = arm.startNode;
 		
-
-		/* 
-        javax.swing.SwingUtilities.invokeLater(new Runnable() {
-            public void run() {
-                arm.createAndShowGUI();
-            }
-        }); */
-        
         javax.swing.SwingUtilities.invokeAndWait(new Runnable() {
             public void run() {
                 arm.createAndShowGUI();
@@ -63,7 +51,7 @@ public class RobotArmDriver {
         }); 
         
 		
-		List<RobotArmNode> sol = arm.PRM(k, theta, goal);
+		List<RobotArmNode> sol = arm.PRM(k);
 		if (sol != null){
 			for (RobotArmNode n : sol) {
 				arm.updatePrintNode(n.getTheta());
@@ -84,6 +72,8 @@ public class RobotArmDriver {
 		System.out.println("\nDone!");
 		
 		/*
+		double[] theta2 = {Math.PI*3/2, Math.PI*5/4 , Math.PI*3/2};
+		double[] goal2 = {Math.PI/2, 0, Math.PI*3/2}; 
 		sol = arm.PRM(k, theta2, goal2);
 		if (sol != null){
 			for (RobotArmNode n : sol) {
