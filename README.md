@@ -4,6 +4,7 @@ This repo contains motion planning algorithms for two different systems: a plana
 
 I solve the first problem by using a k-PRM algorithm, and the second by using a Rapidly-exploring Random tree. 
 
+The problems and solutions are discussed in great detail in motion-planning.pdf. 
 
 ### To Run
 
